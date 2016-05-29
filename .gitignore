@@ -1,0 +1,12 @@
+# directory
+__pycache__
+
+
+# files
+*.log
+*.db
+*.xls
+*.cls
+
+
+
