@@ -26,7 +26,7 @@ cur = conn.cursor()
 try:
     with conn:
         cur = conn.cursor()
-        cur.execute('CREATE TABLE if not exists stock_daily_sellbuy_trend ( stock_code, date,close,rate,volume,i_volume, f_volume,regdate DATETIME DEFAULT CURRENT_TIMESTAMP)')
+        cur.execute('CREATE TABLE if not exists stock_daily_sellbuy_trend ( stock_code, date TEXT(8),close,rate,volume,i_volume, f_volume,regdate DATETIME DEFAULT CURRENT_TIMESTAMP)')
         cur.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_stock_daily_sellbuy_trend ON stock_daily_sellbuy_trend (stock_code, date)')
 
 #         cur.executemany("INSERT OR REPLACE INTO  stock_daily_info (stock_code, date, open, high, low, close, volume, marcap, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", datalist)
@@ -64,10 +64,11 @@ for idx, row in df_sm.iterrows():
         df = pd.read_excel(filename, thousands=',', usecols=['년/월/일', '종가','대비','거래량(주)','기관_순매수(주)','외국인_순매수(주)'])
         df = df.dropna()
         df.columns = ['date','close','rate','volume','i_volume', 'f_volume']
-        df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
+#        df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
+        df['date'] = df['date'].str.replace('/','')
         df_cp = df[['date','close','rate','volume','i_volume', 'f_volume']].copy()
         df_cp['stock_code'] = stock_code
-        
+#        print(df_cp)
         
         df_cp = df_cp[['stock_code', 'date','close','rate','volume','i_volume', 'f_volume']]
         
@@ -75,8 +76,15 @@ for idx, row in df_sm.iterrows():
         
         #df = pd.read_sql_query('SELECT * FROM stock_daily_info limit 5', conn)
 #        print(df_cp.head())
-        df_cp.to_sql('stock_daily_sellbuy_trend', conn, index=False, if_exists='append')
-#        conn.commit()
+        try:
+            with conn:
+                df_cp.to_sql('stock_daily_sellbuy_trend', conn, index=False, if_exists='append')
+        except sqlite3.IntegrityError:
+            pass
+        except sqlite3.Error as e:
+            if conn:
+                conn.rollback()
+            print ("error %s" % e.args[0])
 
 df = pd.read_sql_query('SELECT * FROM stock_daily_sellbuy_trend limit 5', conn)
 print(df.head())

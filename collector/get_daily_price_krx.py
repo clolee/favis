@@ -65,7 +65,7 @@ for idx, row in df_sm.iterrows():
         df = pd.read_excel(filename, thousands=',', usecols=['년/월/일', '종가','거래량(주)','시가','고가','저가', '시가총액(백만)','상장주식수(주)'])
 
         df.columns = ['date','close','volume','open','high','low', 'marcap','amount']
-        df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
+        df['date'] = df['date'].str.replace('/','')
         df_cp = df[['date','close','volume','open','high','low', 'marcap','amount']].copy()
         df_cp['stock_code'] = stock_code
 
