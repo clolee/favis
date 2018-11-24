@@ -1,0 +1,38 @@
+Traceback (most recent call last):
+  File "./get_yesterday_price_krx_mysql.py", line 90, in <module>
+    main_function(d.strftime('%Y%m%d'))
+  File "./get_yesterday_price_krx_mysql.py", line 45, in main_function
+    r = util.get_krx_daily_info(isu_cd, day, day)
+  File "/app/favis/util/krx_util.py", line 67, in get_krx_daily_info
+    r = requests.get(gen_otp_url, gen_otp_data)
+  File "/usr/local/lib/python3.4/dist-packages/requests/api.py", line 70, in get
+    return request('get', url, params=params, **kwargs)
+  File "/usr/local/lib/python3.4/dist-packages/requests/api.py", line 56, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/usr/local/lib/python3.4/dist-packages/requests/sessions.py", line 488, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/usr/local/lib/python3.4/dist-packages/requests/sessions.py", line 609, in send
+    r = adapter.send(request, **kwargs)
+  File "/usr/local/lib/python3.4/dist-packages/requests/adapters.py", line 423, in send
+    timeout=timeout
+  File "/usr/local/lib/python3.4/dist-packages/requests/packages/urllib3/connectionpool.py", line 600, in urlopen
+    chunked=chunked)
+  File "/usr/local/lib/python3.4/dist-packages/requests/packages/urllib3/connectionpool.py", line 356, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "/usr/lib/python3.4/http/client.py", line 1088, in request
+    self._send_request(method, url, body, headers)
+  File "/usr/lib/python3.4/http/client.py", line 1126, in _send_request
+    self.endheaders(body)
+  File "/usr/lib/python3.4/http/client.py", line 1084, in endheaders
+    self._send_output(message_body)
+  File "/usr/lib/python3.4/http/client.py", line 922, in _send_output
+    self.send(msg)
+  File "/usr/lib/python3.4/http/client.py", line 857, in send
+    self.connect()
+  File "/usr/local/lib/python3.4/dist-packages/requests/packages/urllib3/connection.py", line 166, in connect
+    conn = self._new_conn()
+  File "/usr/local/lib/python3.4/dist-packages/requests/packages/urllib3/connection.py", line 141, in _new_conn
+    (self.host, self.port), self.timeout, **extra_kw)
+  File "/usr/local/lib/python3.4/dist-packages/requests/packages/urllib3/util/connection.py", line 73, in create_connection
+    sock.connect(sa)
+KeyboardInterrupt

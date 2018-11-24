@@ -64,7 +64,7 @@ def get_krx_daily_info(isu_cd, start, end):
         'todate':end
     }
 
-    r = requests.post(gen_otp_url, gen_otp_data)
+    r = requests.get(gen_otp_url, gen_otp_data)
     code = r.text
 
     # STEP 02: download
@@ -91,7 +91,7 @@ def get_krx_daily_price(isu_cd, start, end, filetype):
         'todate':end
     }
 
-    r = requests.post(gen_otp_url, gen_otp_data)
+    r = requests.post(gen_otp_url, gen_otp_data, headers={'Connection':'close'})
     code = r.text
 
     # STEP 02: download
@@ -100,7 +100,7 @@ def get_krx_daily_price(isu_cd, start, end, filetype):
         'code': code,
     }
 
-    return requests.post(down_url, down_data).content
+    return requests.post(down_url, down_data, headers={'Connection':'close'}).content
     
     
 def get_krx_today_info(stock_code, isu_cd):
@@ -165,8 +165,59 @@ def get_krx_daily_sellbuy_trend(isu_cd, start, end):
     }
     
     return requests.post(down_url, down_data).content
+
+	
+def get_krx_sellbuy_detail(isu_cd, start, end):
     
+    # STEP 01: Generate OTP
+    gen_otp_url = 'http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx'
+    gen_otp_data = {
+        'name':'fileDown',
+        'filetype':'xls',
+        'url':'MKD/10/1002/10020101/mkd10020101',
+        'isu_cd':isu_cd,
+        'period_selector':'day',
+        'fromdate':start,
+        'todate':end
+    }
+    r = requests.post(gen_otp_url, gen_otp_data)
+    code = r.text
+
+    # STEP 02: download
+    down_url = 'http://file.krx.co.kr/download.jspx'
+    down_data = {
+        'code': code,
+    }
+
+    return requests.post(down_url, down_data).content
     
+def get_krx_daily_stock_index(isu_cd, isu_srt_cd, start, end):    
+    # get krx daily info 
+    # STEP 01: Generate OTP
+    gen_otp_url = 'http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx'
+    gen_otp_data = {
+        'name':'fileDown',
+        'filetype':'xls',
+        'url':'MKD/04/0403/04030800/mkd04030800',
+        'isu_cd':isu_cd,
+        'market_gubun':'ALL',
+        'gubun':'2',
+		'isu_srt_cd':isu_srt_cd,
+        'fromdate':start,
+        'todate':end
+    }
+    
+    r = requests.post(gen_otp_url, gen_otp_data)
+    code = r.text
+    
+    # STEP 02: download
+    down_url = 'http://file.krx.co.kr/download.jspx'
+    down_data = {
+        'code': code,
+    }
+    
+    return requests.post(down_url, down_data).content
+
 if __name__ == '__main__':
     isu_cd, isu_srt_cd = getIsinCd("경동도시가스")
     print (isu_cd, isu_srt_cd)

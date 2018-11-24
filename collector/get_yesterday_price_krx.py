@@ -30,7 +30,7 @@ cur = conn.cursor()
 print (datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S'))
 
 day = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y%m%d')
-day = '20160527'
+day = '20160531'
 print(day)
 for idx, row in df_sm.iterrows():
 	stock_code = row['code']
@@ -55,6 +55,7 @@ for idx, row in df_sm.iterrows():
 	
 	df_cp = df_cp[['stock_code', 'date', 'open', 'high', 'low', 'close', 'volume', 'marcap', 'amount']]
 	print(df_cp.head())
+	data = [tuple(x) for x in df_cp.to_records(index=False)]
 	#df.set_index('Date', inplace=True)
 	#df = df.sort_index(0, ascending=True)
 	#print(df_cp[['stock_code', 'Date','Open','High','Low','Close','Volume','marcap','amount']].head())
@@ -62,7 +63,7 @@ for idx, row in df_sm.iterrows():
 	try:
 		with conn:
 			cur = conn.cursor()
-			cur.execute("INSERT OR REPLACE INTO  stock_daily_info (stock_code, date, open, high, low, close, volume, marcap, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", df_cp)
+			cur.executemany("INSERT OR REPLACE INTO  stock_daily_info (stock_code, date, open, high, low, close, volume, marcap, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", data)
 			conn.commit()
 	except sqlite3.Error as e:
 		if conn:

@@ -10,7 +10,7 @@ plt.plot(x,y)
 plt.savefig('aaa.png', bbox_inches='tight')
 
 
-from msgbot.favisbot import favisbot
+from favisbot import favisbot
 bot = favisbot()
 bot.whisper('plain','hahaha')
 
