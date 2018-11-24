@@ -1,0 +1,42 @@
+# Edit this file to introduce tasks to be run by cron.
+# 
+# Each task to run has to be defined through a single line
+# indicating with different fields when the task will be run
+# and what command to run for the task
+# 
+# To define the time you can provide concrete values for
+# minute (m), hour (h), day of month (dom), month (mon),
+# and day of week (dow) or use '*' in these fields (for 'any').# 
+# Notice that tasks will be started based on the cron's system
+# daemon's notion of time and timezones.
+# 
+# Output of the crontab jobs (including errors) is sent through
+# email to the user the crontab file belongs to (unless redirected).
+# 
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+# 
+# For more information see the manual pages of crontab(5) and cron(8)
+# 
+# m h  dom mon dow   comman
+############################
+MAILTO=""
+# radio recording
+#40 06 * * 1-6 /DataVolume/EBSradio/ebs_record.sh OpenEarEnglish 20 /shares/Public/SharedRadio/OpenEarEnglish
+#00 07 * * 1-6 /DataVolume/EBSradio/ebs_record.sh OpenMouthEnglish 20 /shares/Public/SharedRadio/OpenMouthEnglish
+#20 07 * * 1-6 /DataVolume/EBSradio/ebs_record.sh Easy_Writing 20 /shares/Public/SharedRadio/PowerEnglish
+
+############################
+# favis schduler
+0 20 * * 2-6 /app/favis/collector/get_stock_master_mysql.py >> /app/favis/collector/run.log
+#0 9-18 * * * /app/favis/collector/get_public_notice_rt.py >> /app/favis/collector/run.log
+0 19 * * * /app/favis/collector/get_public_notice_daily.py >> /app/favis/collector/run.log
+#* * * * * /app/favis/test.py >> /app/favis/run.log
+#0 19 * * 1-5 /app/favis/collector/get_today_price_krx.py >> /app/favis/collector/run.log
+0 0 * * 2-6 /app/favis/collector/get_yesterday_price_krx_mysql.py >> /app/favis/collector/run.log
+0 1 * * 2-6 /app/favis/collector/get_yesterday_sellbuy_trend_detail.py >> /app/favis/collector/run.log
+30 7 * * 2-6 /app/favis/collector/get_daily_index_price.py >> /app/favis/collector/run.log
+30 5 * * 2-6 /app/favis/collector/get_daily_stock_index_mysql.py >> /app/favis/collector/run.log
+#0 8 * * 2-6 /app/favis/analytics/send_top10.py
+#1 8 * * 2-6 /app/favis/analytics/send_sellbuy_top10.py
