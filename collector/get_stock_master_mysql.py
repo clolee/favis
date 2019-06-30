@@ -9,6 +9,10 @@ import json
 from bs4 import BeautifulSoup
 import pymysql
 
+sys.path.append("./")
+# User Defined Modules
+import util.favis_util as fu
+
 def get_krx_stock_master():
     # STEP 01: Generate OTP
     gen_otp_url = 'http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx'
@@ -43,8 +47,9 @@ def get_krx_stock_master():
     down_data = {
         'code': code,
     }
+    headers = { 'Referer': 'http://marketdata.krx.co.kr/mdi'} # 꼭 있어야 함.
 
-    r = requests.post(down_url, down_data)
+    r = requests.post(down_url, down_data, headers=headers)
     f = io.BytesIO(r.content)
     
     usecols = ['종목코드', '기업명', '업종코드', '업종', '대표전화', '주소']
@@ -115,12 +120,7 @@ def get_desc(code):
     
 if __name__ == "__main__":
 
-		conn = pymysql.connect(host='localhost',
-									 user='root',
-									 password='ckdfh76!!',
-									 db='favis',
-									 charset='utf8mb4',
-									 cursorclass=pymysql.cursors.DictCursor)
+		conn = fu.get_favis_mysql_connection()
 		
 		cur = conn.cursor()
 
