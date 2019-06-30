@@ -1,0 +1,6 @@
+mysql:
+  host: 192.168.10.18
+  user: mnilcl
+  passwd: Cloud00!
+  db: favis
+

@@ -7,13 +7,12 @@ import io, os
 # user define package import
 import sys
 sys.path.append('../../favis')
-from msgbot.favisbot import favisbot
 import util.krx_util as util
 import pymysql
 
-conn = pymysql.connect(host='localhost',
-							 user='root',
-							 password='ckdfh76!!',
+conn = pymysql.connect(host='192.168.10.18',
+							 user='mnilcl',
+							 password='Cloud00!',
 							 db='favis',
 							 charset='utf8mb4',
 							 cursorclass=pymysql.cursors.DictCursor)

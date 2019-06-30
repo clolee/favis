@@ -1,5 +1,5 @@
 beautifulsoup4
 matplotlib
 python-telegram-bot
-mysql-connector-python
-SQLAlchemy
+pymysql
+pyyaml

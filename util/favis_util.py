@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import pymysql
 import logging
 import logging.handlers
@@ -5,9 +7,9 @@ import datetime, time
 
 def get_favis_mysql_connection():
 	try:
-		conn = pymysql.connect(host='localhost',
-							 user='root',
-							 password='ckdfh76!!',
+		conn = pymysql.connect(host='192.168.10.18',
+							 user='mnilcl',
+							 password='Cloud00!',
 							 db='favis',
 							 charset='utf8mb4',
 							 cursorclass=pymysql.cursors.DictCursor)
@@ -21,17 +23,17 @@ def get_favis_mysql_connection():
 def setLogger(id, filename):
 	# set config
 	favis_log_path='/app/favis/logs/'
-	# ·Î°Å ÀÎ½ºÅÏ½º¸¦ ¸¸µç´Ù
+	# ï¿½Î°ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½
 	logger = logging.getLogger(id)
 
-	# Æ÷¸ÅÅÍ¸¦ ¸¸µç´Ù
+	# ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½
 	fomatter = logging.Formatter('[%(levelname)s][%(asctime)s] : %(message)s')
 
-	# ½ºÆ®¸²°ú ÆÄÀÏ·Î ·Î±×¸¦ Ãâ·ÂÇÏ´Â ÇÚµé·¯¸¦ °¢°¢ ¸¸µç´Ù.
+	# ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ï·ï¿½ ï¿½Î±×¸ï¿½ ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Úµé·¯ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.
 	#fileMaxByte = 1024 * 1024 * 100 #100MB
 	#fileHandler = logging.handlers.RotatingFileHandler(favis_log_path + filename + '.log', maxBytes=fileMaxByte, backupCount=10)
 	fileHandler = logging.FileHandler(favis_log_path + filename + '.log')
-	# ·Î°Å ÀÎ½ºÅÏ½º¿¡ ½ºÆ®¸² ÇÚµé·¯¿Í ÆÄÀÏÇÚµé·¯¸¦ ºÙÀÎ´Ù.
+	# ï¿½Î°ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½Úµé·¯ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Úµé·¯ï¿½ï¿½ ï¿½ï¿½ï¿½Î´ï¿½.
 	logger.addHandler(fileHandler)
 	logger.setLevel(logging.DEBUG)
 	return logger
@@ -42,5 +44,3 @@ def daterange(start, end):
 	end_date = datetime.datetime.strptime(end, '%Y%m%d').date()
 
 	return (start_date + datetime.timedelta(days=i) for i in range((end_date - start_date).days + 1))
-
-

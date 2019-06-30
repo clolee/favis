@@ -5,11 +5,11 @@ import pandas as pd
 import io, os
 import multiprocessing
 # user define package import
-favis_path = "/app/favis/"
+favis_path = "./"
 
 import sys
 sys.path.append(favis_path)
-from msgbot.favisbot import favisbot
+#from msgbot.favisbot import favisbot
 import util.krx_util as util
 import util.favis_util as favis_util
 from util.favis_logger import FavisLogger

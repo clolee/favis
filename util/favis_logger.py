@@ -3,7 +3,7 @@ import logging.handlers
 
 class FavisLogger:
 	# set config
-	favis_log_path='/app/favis/logs/'
+	favis_log_path='/App/favis/logs/'
 
 	def __init__(self, id, filename):
 		# 로거 인스턴스를 만든다
