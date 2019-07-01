@@ -8,25 +8,30 @@ import multiprocessing
 # user define package import
 
 import sys
-sys.path.append('/App/favis')
+sys.path.append("./")
+# User Defined Modules
+import util.favis_util as fu
 #from msgbot.favisbot import favisbot
 import util.krx_util as util
-import util.favis_util as favis_util
-from util.favis_logger import FavisLogger
+#from util.favis_logger import FavisLogger
 import pymysql
+import sqlalchemy as sa
+from sqlalchemy import exc
 
 # set config
 task_id = 'price'
-logger = FavisLogger(task_id, task_id + '_' + datetime.datetime.today().strftime('%Y%m%d'))
+#logger = FavisLogger(task_id, task_id + '_' + datetime.datetime.today().strftime('%Y%m%d'))
 ###################################################################################
+engine = sa.create_engine('mysql+mysqlconnector://mnilcl:Cloud00!@192.168.10.18:3306/favis', echo=False)
 
-
-def main_function(s_day, e_day):
+def main_function(stock_code):
+#	if len(sys.argv) ==  3:
+#		s_day = sys.argv[1]
+#		e_day = sys.argv[2]    	
+	s_day = '19000101'
+	e_day = '20190701'
 	print('\n\n' + str(datetime.datetime.today()) + ' : ' + task_id + ' start...' + s_day + '-' +e_day)
-	logger.info('\n\n' + str(datetime.datetime.today()) + ' : ' + task_id + ' start...' + s_day + '-' +e_day)
-	conn = favis_util.get_favis_mysql_connection()
-	cur = conn.cursor()
-	df_sm = pd.read_sql_query('SELECT * FROM stock_info ORDER BY code ASC', conn)
+#	logger.info('\n\n' + str(datetime.datetime.today()) + ' : ' + task_id + ' start...' + s_day + '-' +e_day)
 
 	starttime = datetime.datetime.now()
 
@@ -35,75 +40,82 @@ def main_function(s_day, e_day):
 	s_day = s_day.replace('-','')
 	e_day = e_day.replace('-','')
 
-	cnt =0
-	for idx, row in df_sm.iterrows():
-		stock_code = row['code']
-		stock_name = row['name']
+	isu_cd = util.getIsinCode(stock_code)
+	r = util.get_krx_daily_info(isu_cd, s_day, e_day)
+	f = io.BytesIO(r)
 
-		isu_cd = util.getIsinCode(stock_code)
-#		logger.debug (stock_code +' ' + stock_name+' ' +isu_cd)
+	df = pd.read_excel(f, thousands=',', usecols=['년/월/일', '종가','거래량(주)','시가','고가','저가', '시가총액(백만)','상장주식수(주)'])
 
-#		path = "/app/favis/collector/data/"
-#		filename = path + stock_code + "_price.xls"
-		r = util.get_krx_daily_info(isu_cd, s_day, e_day)
-		filename = io.BytesIO(r)
-#		with open(filename, 'wb') as f:
-#			f.write(r)
+	df.columns = ['date','close','volume','open','high','low', 'marcap','amount']
+	df['date'] = df['date'].str.replace('/','')
+	df_cp = df[['date','close','volume','open','high','low', 'marcap','amount']].copy()
+	df_cp['code'] = stock_code
+	
+	df_cp = df_cp[['code', 'date', 'open', 'high', 'low', 'close', 'volume', 'marcap', 'amount']]
+	#logger.debug(df_cp.head())
+	#data = [tuple(x) for x in df_cp.to_records(index=False)]
+	#logger.debug(df_cp[['stock_code', 'Date','Open','High','Low','Close','Volume','marcap','amount']].head())
 
-		df = pd.read_excel(filename, thousands=',', usecols=['년/월/일', '종가','거래량(주)','시가','고가','저가', '시가총액(백만)','상장주식수(주)'])
+	print(df_cp.head(3))
+	try:
+		df_cp.to_sql(name='daily_info', con=engine, if_exists = 'append', index=False)
+	except exc.IntegrityError:
+		pass
 
-		df.columns = ['date','close','volume','open','high','low', 'marcap','amount']
-		df['date'] = df['date'].str.replace('/','')
-		df_cp = df[['date','close','volume','open','high','low', 'marcap','amount']].copy()
-		df_cp['stock_code'] = stock_code
+	# for idx, row in df_cp.iterrows():
+	# 	try:
+	# 			cur.execute('INSERT INTO daily_info (code, date, open, high, low, close, volume, marcap, amount) ' \
+	# 						'VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)', (row['stock_code'], row['date'], row['open'], row['high'], row['low'], row['close'], row['volume'], row['marcap'], row['amount']))
 		
-		df_cp = df_cp[['stock_code', 'date', 'open', 'high', 'low', 'close', 'volume', 'marcap', 'amount']]
-		#logger.debug(df_cp.head())
-		#data = [tuple(x) for x in df_cp.to_records(index=False)]
-		#logger.debug(df_cp[['stock_code', 'Date','Open','High','Low','Close','Volume','marcap','amount']].head())
-
-		for idx, row in df_cp.iterrows():
-			try:
-					cur.execute('INSERT INTO daily_info (code, date, open, high, low, close, volume, marcap, amount) ' \
-								'VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)', (row['stock_code'], row['date'], row['open'], row['high'], row['low'], row['close'], row['volume'], row['marcap'], row['amount']))
-			
-					conn.commit()
-			except pymysql.IntegrityError:
-				pass
-			except pymysql.Error as e:
-				if conn:
-					conn.rollback()
-				logger.debug ("error %s" % e.args[0])
-		cnt = cnt +1 
-
+	# 			conn.commit()
+	# 	except pymysql.IntegrityError:
+	# 		pass
+	# 	except pymysql.Error as e:
+	# 		if conn:
+	# 			conn.rollback()
+	# 		logger.debug ("error %s" % e.args[0])
+	# cnt = cnt +1 
+	
 	endtime = datetime.datetime.now()
-	logger.info('count :' + str(cnt) + ', elaspsedtime : ' + str(endtime - starttime))
-	logger.info(str(datetime.datetime.today()) + ' : ' + task_id + ' end...')
-
-	if conn:
-		conn.close()
-
-
+	print('count :' + str(len(df_cp)) + ', elaspsedtime : ' + str(endtime - starttime))
+	print(str(datetime.datetime.today()) + ' : ' + task_id + ' end...')
 
 # main
-if len(sys.argv) ==  30:
-	startdate = sys.argv[1]
-	enddate = sys.argv[2]
-	logger.debug('term : ' + startdate + '-' + enddate)
-	dd = pd.Series(pd.bdate_range(startdate, enddate).format())
-	print(dd)
-	pool = multiprocessing.Pool(processes=5)
+#if len(sys.argv) ==  30:
+#	startdate = sys.argv[1]
+	# enddate = sys.argv[2]
+	# logger.debug('term : ' + startdate + '-' + enddate)
+	# dd = pd.Series(pd.bdate_range(startdate, enddate).format())
+	# print(dd)
+	# pool = multiprocessing.Pool(processes=5)
 #	pool.map(main_function, favis_util.daterange(startdate, enddate))
-	pool.map(main_function, dd)
+#	pool.map(main_function, dd)
 #	pool.close
 #	pool.join()
 
 #	for d in favis_util.daterange(startdate, enddate):
 #		logger.debug('day : ' + d.strftime('%Y%m%d'))
 #		main_function(d.strftime('%Y%m%d'))
-else:
+#else:
 #	day = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y%m%d')
 #	print("day:" + day)
 #	main_function(day)
-	main_function(sys.argv[1], sys.argv[2])
+#	main_function(sys.argv[1], sys.argv[2])
 
+if __name__ == "__main__":
+    
+	conn = fu.get_favis_mysql_connection()
+	cur = conn.cursor()
+
+	starttime = datetime.datetime.now()
+	print("1) get krx stock master")
+	df_sm = pd.read_sql_query('SELECT code FROM stock_info ORDER BY code ASC', conn)
+	print(df_sm.values.flatten())
+	
+	pool = multiprocessing.Pool(processes=10)
+	pool.map(main_function, df_sm.values.flatten())
+
+	endtime = datetime.datetime.now()
+	print('elaspsedtime : ' + str(endtime - starttime))
+	if conn:
+		conn.close()		

@@ -119,52 +119,52 @@ def get_desc(code):
     
 if __name__ == "__main__":
 
-		conn = fu.get_favis_mysql_connection()
-		
-		cur = conn.cursor()
-
-		print("1) get krx stock master")
-		df = get_krx_stock_master()   
-		
-		# stock_desc 테이블  쓰기
-		df_desc = df[['code', 'name', 'sector_code', 'sector', 'telephone', 'address']].copy()
-		df_desc['market'] = ''
-		df_desc['wics'] = ''
-		df_desc['name_en'] = ''
-		df_desc['desc'] = ''
-		df_desc['desc_date'] = ''
-		df_desc = df_desc.fillna('')
-		
-		print("2) get stock desc and update db")
-		cnt = 0
-		for idx, row in df_desc.iterrows():
-			try:
-				if row['wics'] == '':
-					market, wics, name_en = get_sector(row['code'])
-					cur.execute('INSERT INTO stock_info (code, name, name_en, market, wics, sector, sector_code, telephone, address) ' \
-								'VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)', (row['code'], row['name'], name_en, market, wics, row['sector'], row['sector_code'], row['telephone'], row['address']) )
-					conn.commit()
-			
-				if row['desc_date'] == '':
-					desc, desc_date = get_desc(row['code'])
-					cur.execute('UPDATE stock_info SET description=%s, desc_updateddt = %s WHERE code=%s', (desc, desc_date, row['code']) )
-					conn.commit()
-
-				cnt = cnt + 1
-				if (cnt % 100) == 0:
-					print("3) get krx stock master (%s)" % cnt)
-
-			except pymysql.IntegrityError:
-				cur.execute('UPDATE stock_info SET name=%s, updateddt=current_timestamp WHERE code=%s', (row['name'], row['code']) )
-#				print ("IntegrityError %s" % row['code'])
-				conn.commit()
-				pass
-			except pymysql.Error as e:
-				if conn:
-					conn.rollback()
-				print ("error %s (%s)" % e.args[0], str(e))
-
-		
-		print ("total %s record inserted" % cnt)
-		conn.close()    
+    conn = fu.get_favis_mysql_connection()
     
+    cur = conn.cursor()
+
+    print("1) get krx stock master")
+    df = get_krx_stock_master()   
+    
+    # stock_desc 테이블  쓰기
+    df_desc = df[['code', 'name', 'sector_code', 'sector', 'telephone', 'address']].copy()
+    df_desc['market'] = ''
+    df_desc['wics'] = ''
+    df_desc['name_en'] = ''
+    df_desc['desc'] = ''
+    df_desc['desc_date'] = ''
+    df_desc = df_desc.fillna('')
+    
+    print("2) get stock desc and update db")
+    cnt = 0
+    for idx, row in df_desc.iterrows():
+        try:
+            if row['wics'] == '':
+                market, wics, name_en = get_sector(row['code'])
+                cur.execute('INSERT INTO stock_info (code, name, name_en, market, wics, sector, sector_code, telephone, address) ' \
+                            'VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)', (row['code'], row['name'], name_en, market, wics, row['sector'], row['sector_code'], row['telephone'], row['address']) )
+                conn.commit()
+        
+            if row['desc_date'] == '':
+                desc, desc_date = get_desc(row['code'])
+                cur.execute('UPDATE stock_info SET description=%s, desc_updateddt = %s WHERE code=%s', (desc, desc_date, row['code']) )
+                conn.commit()
+
+            cnt = cnt + 1
+            if (cnt % 100) == 0:
+                print("3) get krx stock master (%s)" % cnt)
+
+        except pymysql.IntegrityError:
+            cur.execute('UPDATE stock_info SET name=%s, updateddt=current_timestamp WHERE code=%s', (row['name'], row['code']) )
+#				print ("IntegrityError %s" % row['code'])
+            conn.commit()
+            pass
+        except pymysql.Error as e:
+            if conn:
+                conn.rollback()
+            print ("error %s (%s)" % e.args[0], str(e))
+
+    
+    print ("total %s record inserted" % cnt)
+    conn.close()    
+
