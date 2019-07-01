@@ -1,5 +1,4 @@
-#!/usr/bin/python
-
+# -*- coding: utf-8 -*-
 import requests
 import pandas as pd
 import io
@@ -9,7 +8,7 @@ import json
 from bs4 import BeautifulSoup
 import pymysql
 
-sys.path.append("./")
+sys.path.append("/App/favis/")
 # User Defined Modules
 import util.favis_util as fu
 
@@ -134,6 +133,7 @@ if __name__ == "__main__":
 		df_desc['name_en'] = ''
 		df_desc['desc'] = ''
 		df_desc['desc_date'] = ''
+		df_desc = df_desc.fillna('')
 		
 		print("2) get stock desc and update db")
 		cnt = 0
@@ -162,7 +162,7 @@ if __name__ == "__main__":
 			except pymysql.Error as e:
 				if conn:
 					conn.rollback()
-				print ("error %s" % e.args[0])
+				print ("error %s (%s)" % e.args[0], str(e))
 
 		
 		print ("total %s record inserted" % cnt)

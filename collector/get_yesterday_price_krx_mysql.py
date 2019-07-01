@@ -1,14 +1,14 @@
-#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import requests
 import datetime, time
 import pandas as pd
 import io, os
 import multiprocessing
 # user define package import
-favis_path = "./"
 
 import sys
-sys.path.append(favis_path)
+sys.path.append('/App/favis')
 #from msgbot.favisbot import favisbot
 import util.krx_util as util
 import util.favis_util as favis_util
@@ -22,6 +22,7 @@ logger = FavisLogger(task_id, task_id + '_' + datetime.datetime.today().strftime
 
 
 def main_function(s_day, e_day):
+	print('\n\n' + str(datetime.datetime.today()) + ' : ' + task_id + ' start...' + s_day + '-' +e_day)
 	logger.info('\n\n' + str(datetime.datetime.today()) + ' : ' + task_id + ' start...' + s_day + '-' +e_day)
 	conn = favis_util.get_favis_mysql_connection()
 	cur = conn.cursor()
@@ -42,11 +43,12 @@ def main_function(s_day, e_day):
 		isu_cd = util.getIsinCode(stock_code)
 #		logger.debug (stock_code +' ' + stock_name+' ' +isu_cd)
 
-		path = "/app/favis/collector/data/"
-		filename = path + stock_code + "_price.xls"
+#		path = "/app/favis/collector/data/"
+#		filename = path + stock_code + "_price.xls"
 		r = util.get_krx_daily_info(isu_cd, s_day, e_day)
-		with open(filename, 'wb') as f:
-			f.write(r)
+		filename = io.BytesIO(r)
+#		with open(filename, 'wb') as f:
+#			f.write(r)
 
 		df = pd.read_excel(filename, thousands=',', usecols=['년/월/일', '종가','거래량(주)','시가','고가','저가', '시가총액(백만)','상장주식수(주)'])
 
@@ -84,11 +86,12 @@ def main_function(s_day, e_day):
 
 
 # main
-if len(sys.argv) ==  3:
+if len(sys.argv) ==  30:
 	startdate = sys.argv[1]
 	enddate = sys.argv[2]
 	logger.debug('term : ' + startdate + '-' + enddate)
-	dd = pd.Series(pd.bdate_range('20180711', '20180715').format())
+	dd = pd.Series(pd.bdate_range(startdate, enddate).format())
+	print(dd)
 	pool = multiprocessing.Pool(processes=5)
 #	pool.map(main_function, favis_util.daterange(startdate, enddate))
 	pool.map(main_function, dd)
@@ -99,7 +102,8 @@ if len(sys.argv) ==  3:
 #		logger.debug('day : ' + d.strftime('%Y%m%d'))
 #		main_function(d.strftime('%Y%m%d'))
 else:
-	day = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y%m%d')
-	print("day:" + day)
-	main_function(day)
+#	day = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y%m%d')
+#	print("day:" + day)
+#	main_function(day)
+	main_function(sys.argv[1], sys.argv[2])
 

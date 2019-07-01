@@ -67,13 +67,14 @@ def get_krx_daily_info(isu_cd, start, end):
     r = requests.get(gen_otp_url, gen_otp_data)
     code = r.text
 
+    headers = { 'Referer': 'http://marketdata.krx.co.kr/mdi', 'Connection': 'close'}
     # STEP 02: download
     down_url = 'http://file.krx.co.kr/download.jspx'
     down_data = {
         'code': code,
     }
 
-    return requests.post(down_url, down_data).content
+    return requests.post(down_url, down_data, headers=headers).content
 
 # get krx daily info 
 def get_krx_daily_price(isu_cd, start, end, filetype):
@@ -90,8 +91,9 @@ def get_krx_daily_price(isu_cd, start, end, filetype):
         'fromdate':start,
         'todate':end
     }
+    headers = { 'Referer': 'http://marketdata.krx.co.kr/mdi', 'Connection': 'close'}
 
-    r = requests.post(gen_otp_url, gen_otp_data, headers={'Connection':'close'})
+    r = requests.post(gen_otp_url, gen_otp_data, headers=headers)
     code = r.text
 
     # STEP 02: download
