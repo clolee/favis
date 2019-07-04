@@ -165,8 +165,8 @@ def get_krx_daily_sellbuy_trend(isu_cd, start, end):
     down_data = {
         'code': code,
     }
-    
-    return requests.post(down_url, down_data).content
+    headers = { 'Referer': 'http://marketdata.krx.co.kr/mdi'}
+    return requests.post(down_url, down_data, headers=headers).content
 
 	
 def get_krx_sellbuy_detail(isu_cd, start, end):
@@ -190,8 +190,8 @@ def get_krx_sellbuy_detail(isu_cd, start, end):
     down_data = {
         'code': code,
     }
-
-    return requests.post(down_url, down_data).content
+    headers = { 'Referer': 'http://marketdata.krx.co.kr/mdi'}
+    return requests.post(down_url, down_data, headers=headers).content
     
 def get_krx_daily_stock_index(isu_cd, isu_srt_cd, start, end):    
     # get krx daily info 

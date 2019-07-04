@@ -28,13 +28,15 @@ def main_function(stock_code):
 	if len(sys.argv) ==  3:
 		s_day = sys.argv[1]
 		e_day = sys.argv[2]    	
-        else:
+	else:
 		s_day =  (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y%m%d')   	
 		e_day =  (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y%m%d')   	
 #	s_day = '19000101'
 #	e_day = '20190701'
 #	print('\n [' + stock_code + ']' + str(datetime.datetime.today()) + ' : ' + task_id + ' start...' + s_day + '-' +e_day)
 #	logger.info('\n\n' + str(datetime.datetime.today()) + ' : ' + task_id + ' start...' + s_day + '-' +e_day)
+	print('\n\n' + str(datetime.datetime.today()) + ' : ' + task_id + ' start...' + s_day + '-' +e_day)
+#
 
 	starttime = datetime.datetime.now()
 
@@ -110,16 +112,14 @@ if __name__ == "__main__":
 	cur = conn.cursor()
 
 	starttime = datetime.datetime.now()
-	print('start : ' + str(starttime))
 	print("1) get krx stock master")
-#	df_sm = pd.read_sql_query('SELECT code FROM stock_info ORDER BY code ASC', conn)
-	df_sm = pd.read_sql_query('SELECT code FROM stock_info WHERE CODE NOT IN (SELECT distinct(CODE) FROM daily_info) ORDER BY code ASC', conn)
+	df_sm = pd.read_sql_query('SELECT code FROM stock_info ORDER BY code ASC', conn)
+#	df_sm = pd.read_sql_query('SELECT code FROM stock_info WHERE CODE NOT IN (SELECT distinct(CODE) FROM daily_info) ORDER BY code ASC', conn)
 	print(df_sm.values.flatten())
 	
-	pool = concurrent.futures.ProcessPoolExecutor(max_workers=50)
+	pool = concurrent.futures.ProcessPoolExecutor(max_workers=10)
 	pool.map(main_function, df_sm.values.flatten())
 
 	endtime = datetime.datetime.now()
-	print('end : ' + str(endtime) + ',elaspsedtime : ' + str(endtime - starttime))
 	if conn:
 		conn.close()		

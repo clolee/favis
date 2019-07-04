@@ -20,6 +20,9 @@ class FavisLogger:
 		self.logger.addHandler(fileHandler)
 		self.logger.setLevel(logging.DEBUG)
 	
+	def error(self, msg):
+    		self.logger.error(msg)
+
 	def debug(self, msg):
 		self.logger.debug(msg)
 

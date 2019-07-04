@@ -1,16 +1,16 @@
-#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import requests
 import datetime
 import pandas as pd
-from pandas import DataFrame
 import io, os
 # user define package import
-favis_path = "/app/favis/"
+
 import sys
-sys.path.append(favis_path)
-from msgbot.favisbot import favisbot
+sys.path.append("./")
+#from msgbot.favisbot import favisbot
 import util.krx_util as util
-import util.favis_util as favis_util
+import util.favis_util as fu
 from util.favis_logger import FavisLogger
 import pymysql
 
@@ -30,7 +30,7 @@ def main_function(day):
 #		logger.debug(start_code)
 #		where_cond = "where code > '" + start_code + "'"
 
-	conn = favis_util.get_favis_mysql_connection()
+	conn = fu.get_favis_mysql_connection()
 	cur = conn.cursor()
 
 	query = 'SELECT * FROM stock_info '+ where_cond +' ORDER BY code ASC'
@@ -49,13 +49,10 @@ def main_function(day):
 		isu_cd = util.getIsinCode(stock_code)
 		#logger.debug (stock_code, stock_name, isu_cd)
 
-		path = favis_path + "collector/data/"
-		filename = path + stock_code + "_sellbuy_trend.xls"
 		r = util.get_krx_daily_sellbuy_trend(isu_cd, day, day)
-		with open(filename, 'wb') as f:
-			f.write(r)
+		f = io.BytesIO(r)
 
-		df = pd.read_excel(filename, thousands=',', usecols=['년/월/일', '기관_순매수(주)','외국인_순매수(주)'])
+		df = pd.read_excel(f, thousands=',', usecols=['년/월/일', '기관_순매수(주)','외국인_순매수(주)'])
 		df = df.dropna()
 		df.columns = ['date','i_volume', 'f_volume']
 		df['date'] = df['date'].str.replace('/','')
@@ -63,6 +60,8 @@ def main_function(day):
 		df_cp['stock_code'] = stock_code
 		df_cp = df_cp[['stock_code', 'date','i_volume', 'f_volume']]
 		
+		print(df.head())
+
 		if len(df_cp) == 0 :
 			logger.debug(stock_code +' ' + stock_name+' ' +isu_cd + ' data not found!!')
 		else :		
@@ -95,7 +94,7 @@ if len(sys.argv) ==  3:
 	startdate = sys.argv[1]
 	enddate = sys.argv[2]
 	logger.debug('term : ' + startdate + '-' + enddate)
-	for d in favis_util.daterange(startdate, enddate):
+	for d in fu.daterange(startdate, enddate):
 		main_function(d.strftime('%Y%m%d'))
 else:
 	day = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y%m%d')
