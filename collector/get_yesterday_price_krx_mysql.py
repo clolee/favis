@@ -4,7 +4,7 @@ import requests
 import datetime, time
 import pandas as pd
 import io, os
-import multiprocessing
+import concurrent.futures
 # user define package import
 
 import sys
@@ -25,12 +25,15 @@ task_id = 'price'
 engine = sa.create_engine('mysql+mysqlconnector://mnilcl:Cloud00!@192.168.10.18:3306/favis', echo=False)
 
 def main_function(stock_code):
-#	if len(sys.argv) ==  3:
-#		s_day = sys.argv[1]
-#		e_day = sys.argv[2]    	
-	s_day = '19000101'
-	e_day = '20190701'
-	print('\n\n' + str(datetime.datetime.today()) + ' : ' + task_id + ' start...' + s_day + '-' +e_day)
+	if len(sys.argv) ==  3:
+		s_day = sys.argv[1]
+		e_day = sys.argv[2]    	
+        else:
+		s_day =  (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y%m%d')   	
+		e_day =  (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y%m%d')   	
+#	s_day = '19000101'
+#	e_day = '20190701'
+#	print('\n [' + stock_code + ']' + str(datetime.datetime.today()) + ' : ' + task_id + ' start...' + s_day + '-' +e_day)
 #	logger.info('\n\n' + str(datetime.datetime.today()) + ' : ' + task_id + ' start...' + s_day + '-' +e_day)
 
 	starttime = datetime.datetime.now()
@@ -56,7 +59,6 @@ def main_function(stock_code):
 	#data = [tuple(x) for x in df_cp.to_records(index=False)]
 	#logger.debug(df_cp[['stock_code', 'Date','Open','High','Low','Close','Volume','marcap','amount']].head())
 
-	print(df_cp.head(3))
 	try:
 		df_cp.to_sql(name='daily_info', con=engine, if_exists = 'append', index=False)
 	except exc.IntegrityError:
@@ -77,8 +79,8 @@ def main_function(stock_code):
 	# cnt = cnt +1 
 	
 	endtime = datetime.datetime.now()
-	print('count :' + str(len(df_cp)) + ', elaspsedtime : ' + str(endtime - starttime))
-	print(str(datetime.datetime.today()) + ' : ' + task_id + ' end...')
+	print('[' + stock_code + ']' 'count :' + str(len(df_cp)) + ', elaspsedtime : ' + str(endtime - starttime))
+#	print(str(datetime.datetime.today()) + ' : ' + task_id + ' end...')
 
 # main
 #if len(sys.argv) ==  30:
@@ -108,14 +110,16 @@ if __name__ == "__main__":
 	cur = conn.cursor()
 
 	starttime = datetime.datetime.now()
+	print('start : ' + str(starttime))
 	print("1) get krx stock master")
-	df_sm = pd.read_sql_query('SELECT code FROM stock_info ORDER BY code ASC', conn)
+#	df_sm = pd.read_sql_query('SELECT code FROM stock_info ORDER BY code ASC', conn)
+	df_sm = pd.read_sql_query('SELECT code FROM stock_info WHERE CODE NOT IN (SELECT distinct(CODE) FROM daily_info) ORDER BY code ASC', conn)
 	print(df_sm.values.flatten())
 	
-	pool = multiprocessing.Pool(processes=10)
+	pool = concurrent.futures.ProcessPoolExecutor(max_workers=50)
 	pool.map(main_function, df_sm.values.flatten())
 
 	endtime = datetime.datetime.now()
-	print('elaspsedtime : ' + str(endtime - starttime))
+	print('end : ' + str(endtime) + ',elaspsedtime : ' + str(endtime - starttime))
 	if conn:
 		conn.close()		
