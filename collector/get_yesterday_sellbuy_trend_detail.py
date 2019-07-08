@@ -10,7 +10,7 @@ import concurrent.futures
 # user define package import
 
 import sys
-sys.path.append('./')
+sys.path.append('/App/favis/')
 #from msgbot.favisbot import favisbot
 import util.krx_util as util
 import util.favis_util as fu

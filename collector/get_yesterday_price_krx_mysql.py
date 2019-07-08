@@ -8,7 +8,7 @@ import concurrent.futures
 # user define package import
 
 import sys
-sys.path.append("./")
+sys.path.append("/App/favis")
 # User Defined Modules
 import util.favis_util as fu
 #from msgbot.favisbot import favisbot
