@@ -39,8 +39,9 @@ def setLogger(id, filename):
 	return logger
 
 
-def daterange(start, end):
+
+def getDateRangeList(start, end):
 	start_date = datetime.datetime.strptime(start, '%Y%m%d').date()
 	end_date = datetime.datetime.strptime(end, '%Y%m%d').date()
 
-	return (start_date + datetime.timedelta(days=i) for i in range((end_date - start_date).days + 1))
+	return [(start_date + datetime.timedelta(days=i)).strftime('%Y%m%d') for i in range((end_date - start_date).days + 1)]
