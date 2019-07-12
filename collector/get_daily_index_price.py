@@ -5,8 +5,8 @@ import pandas as pd
 from pandas import DataFrame
 # user define package import
 import sys
-sys.path.append("/app/favis")
-from msgbot.favisbot import favisbot
+sys.path.append("./")
+#from msgbot.favisbot import favisbot
 import util.favis_util as favis_util
 from util.favis_logger import FavisLogger
 import pymysql
@@ -30,6 +30,7 @@ for index_type in index_types:
 	r = requests.get(url).content
 	df = json.loads(r.decode('utf-8'))
 	rows = df['result']['siseList']
+	print(rows)
 
 	cnt = 0
 	for row in rows:

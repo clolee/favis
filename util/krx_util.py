@@ -217,8 +217,9 @@ def get_krx_daily_stock_index(isu_cd, isu_srt_cd, start, end):
     down_data = {
         'code': code,
     }
+    headers = { 'Referer': 'http://marketdata.krx.co.kr/mdi'}
     
-    return requests.post(down_url, down_data).content
+    return requests.post(down_url, down_data, headers=headers).content
 
 if __name__ == '__main__':
     isu_cd, isu_srt_cd = getIsinCd("경동도시가스")

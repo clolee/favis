@@ -4,6 +4,7 @@ import pymysql
 import logging
 import logging.handlers
 import datetime, time
+import pandas as pd
 
 def get_favis_mysql_connection():
 	try:
@@ -45,3 +46,7 @@ def getDateRangeList(start, end):
 	end_date = datetime.datetime.strptime(end, '%Y%m%d').date()
 
 	return [(start_date + datetime.timedelta(days=i)).strftime('%Y%m%d') for i in range((end_date - start_date).days + 1)]
+
+
+def getWorkingDays(start, end):
+	return pd.date_range(start, end, freq='B')
