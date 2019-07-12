@@ -32,7 +32,8 @@ def main_function(date):
 	conn = fu.get_favis_mysql_connection()
 	cur = conn.cursor()
 	print("1) get krx trading trend")
-	df_sm = pd.read_sql_query("SELECT code FROM stock_info ORDER BY code ASC", conn)
+	#df_sm = pd.read_sql_query("SELECT code FROM stock_info ORDER BY code ASC", conn)
+	df_sm = pd.read_sql_query("SELECT code FROM stock_info WHERE CODE NOT IN (SELECT CODE FROM trading_trend WHERE DATE = '"+ date +"') ORDER BY code ASC", conn)
 	print(df_sm.values.flatten())
 	endtime = datetime.datetime.now()
 	if conn:
@@ -49,9 +50,9 @@ def main_function(date):
 
 		df = pd.read_excel(f, thousands=',', usecols=['투자자명','거래량_순매수'])
 		if (cnt%100 == 0):
-			print(str(cnt), end='', flush=True)
-		else:
-			print('.', end='', flush=True)
+			print(str(cnt), end=',', flush=True)
+#		else:
+#			print('.', end='', flush=True)
 		df['stock_code'] = stock_code
 		df = df.pivot(index='stock_code', columns='투자자명', values='거래량_순매수')
 		del df.index.name
@@ -70,6 +71,7 @@ def main_function(date):
 				df_cp.to_sql(name='trading_trend', con=engine, if_exists = 'append', index=False)
 				cnt = cnt + 1
 			except exc.IntegrityError:
+				cnt = cnt + 1
 				pass
 
 	endtime = datetime.datetime.now()
@@ -85,13 +87,13 @@ if __name__ == "__main__":
 			s_day = sys.argv[1]
 			e_day = sys.argv[2]
 		else:
-			s_day =  (datetime.datetime.today() - datetime.timedelta(10)).strftime('%Y%m%d')   	
+			s_day =  (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y%m%d')   	
 			e_day =  (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y%m%d')   	
 
 		dd = fu. getDateRangeList(s_day, e_day)
 		print(dd)
 
-		pool = concurrent.futures.ProcessPoolExecutor(max_workers=5)
+		pool = concurrent.futures.ProcessPoolExecutor(max_workers=10)
 		pool.map(main_function, dd)
 	except Exception as e:
 		print ("error %s" % e.args[0])
