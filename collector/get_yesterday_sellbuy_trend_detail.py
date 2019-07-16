@@ -90,7 +90,7 @@ if __name__ == "__main__":
 			s_day =  (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y%m%d')   	
 			e_day =  (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y%m%d')   	
 
-		dd = fu. getDateRangeList(s_day, e_day)
+		dd = fu.getWorkingDays(s_day, e_day)
 		print(dd)
 
 		pool = concurrent.futures.ProcessPoolExecutor(max_workers=10)

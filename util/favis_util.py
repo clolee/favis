@@ -49,4 +49,4 @@ def getDateRangeList(start, end):
 
 
 def getWorkingDays(start, end):
-	return pd.date_range(start, end, freq='B')
+	return[d.strftime('%Y%m%d') for d in pd.date_range(start, end, freq='B')]
