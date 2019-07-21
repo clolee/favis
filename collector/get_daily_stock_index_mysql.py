@@ -41,10 +41,11 @@ def main_function(day):
 		f = io.BytesIO(r)
 
 		df = pd.read_excel(f, thousands=',', usecols=['일자', '종목코드','EPS','PER','BPS','PBR','주당배당금','배당수익률'], converters={'종목코드':str})
-		df.columns = ['date','stock_code','eps','per','bps','pbr', 'dividend','dividend_rate']
+		df.columns = ['date','code','eps','per','bps','pbr', 'dividend','dividend_rate']
 		df['date'] = df['date'].str.replace('/','')
+		df['per'] = pd.to_numeric(df['per'], errors='coerce')
+		#print(str(cnt) + " " + stock_code + " : " + str(len(df)))
 		
-		print(str(cnt) + " " + stock_code + " : " + str(len(df)))
 		#data = [tuple(x) for x in df_cp.to_records(index=False)]
 		#df.set_index('Date', inplace=True)
 		#df = df.sort_index(0, ascending=True)
@@ -57,6 +58,8 @@ def main_function(day):
 			except exc.IntegrityError:
 				cnt = cnt + 1
 				pass
+			except Exception as e:
+				print ("error %s" % e.args[0])
 
 	#df = pd.read_sql_query('SELECT * FROM daily_info limit 5', conn)
 	#print(df.head())
@@ -76,10 +79,10 @@ if __name__ == "__main__":
 			s_day =  (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y%m%d')   	
 			e_day =  (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y%m%d')   	
 
-		dd = fu. getWorkingDays(s_day, e_day)
+		dd = fu.getDateRangeList(s_day, e_day)
 		print(dd)
 
-		pool = concurrent.futures.ProcessPoolExecutor(max_workers=10)
+		pool = concurrent.futures.ProcessPoolExecutor(max_workers=1)
 		pool.map(main_function, dd)
 	except Exception as e:
 		print ("error %s" % e.args[0])

@@ -84,7 +84,7 @@ bot = favisbot()
 rows = cur.fetchall()
 for row in rows:
 	logger.debug(row)
-//	bot.whisper('plain','[유상증자 관련 공시]\n공시일시: ' + row['date']+" "+row['time']
+	bot.whisper('plain','[유상증자 관련 공시]\n공시일시: ' + row['date']+" "+row['time']
 				+"\n회사: "+row['company']+"("+row['market_type']+")\n공시내용: "+row['title'] + "\n상세링크: "+row['link'])
 
 if conn:

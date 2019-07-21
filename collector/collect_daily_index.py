@@ -24,16 +24,19 @@ def main_function(code):
     print ("[%s] code : %s ...begin" % (datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S'), code))
 
 	# collect data
-    df = fdr.DataReader(code, '2000')
+    day =  (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y-%m-%d')    
+    df = fdr.DataReader(code, day)
     df = df.reset_index()
-    df['index_type'] = code
-    df.columns = ['date','close', 'open','high','low','volume','change','index_type']    
+    df['code'] = code
+    print("size :" + str(df.size))
+    df.columns = ['date','close', 'open','high','low','volume','change_rate','code']    
     df['date'] = df['date'].astype(str).str.replace('-','')
-    print(df.tail())
+    df['change_rate'] = round(df['change_rate'], 4)
     print("data size :" + str(df.size))
     try:
         df.to_sql(name='daily_index', con=engine, if_exists = 'append', index=False)
-    except exc.IntegrityError:
+    except exc.IntegrityError as e:
+        print ("error %s" % e.args[0])
         pass
     except Exception as e:
         print ("error %s" % e.args[0])

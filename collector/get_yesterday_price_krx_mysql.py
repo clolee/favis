@@ -49,14 +49,14 @@ def main_function(stock_code):
 	r = util.get_krx_daily_info(isu_cd, s_day, e_day)
 	f = io.BytesIO(r)
 
-	df = pd.read_excel(f, thousands=',', usecols=['년/월/일', '종가','거래량(주)','시가','고가','저가', '시가총액(백만)','상장주식수(주)'])
+	df = pd.read_excel(f, thousands=',', usecols=['년/월/일', '종가','대비','거래량(주)','시가','고가','저가', '시가총액(백만)','상장주식수(주)'])
 
-	df.columns = ['date','close','volume','open','high','low', 'marcap','amount']
+	df.columns = ['date','close','change','volume','open','high','low', 'marcap','amount']
 	df['date'] = df['date'].str.replace('/','')
-	df_cp = df[['date','close','volume','open','high','low', 'marcap','amount']].copy()
+	df_cp = df[['date','close','change','volume','open','high','low', 'marcap','amount']].copy()
 	df_cp['code'] = stock_code
 	
-	df_cp = df_cp[['code', 'date', 'open', 'high', 'low', 'close', 'volume', 'marcap', 'amount']]
+	df_cp = df_cp[['code', 'date', 'open', 'high', 'low', 'close', 'volume', 'marcap', 'amount','change']]
 	#logger.debug(df_cp.head())
 	#data = [tuple(x) for x in df_cp.to_records(index=False)]
 	#logger.debug(df_cp[['stock_code', 'Date','Open','High','Low','Close','Volume','marcap','amount']].head())
