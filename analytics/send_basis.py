@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/App/tools/anaconda3/bin/python
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -15,24 +15,19 @@ import util.favis_util as favis_util
 import pymysql
 # set config
 ###################################################################################
-try:
-    conn = pymysql.connect(host='localhost',
-                         user='root',
-                         password='ckdfh76!!',
+conn = pymysql.connect(host='192.168.10.18',
+                         user='mnilcl',
+                         password='Cloud00!',
                          db='favis',
                          charset='utf8mb4',
                          cursorclass=pymysql.cursors.DictCursor)
-except pymysql.Error as e:
-    if conn:
-        conn.close()
-    print ("error %s" % e.args[0])
 
 cur = conn.cursor()
 stock_code = '009180'
-query = "select i.date, MAX(CASE WHEN i.index_type = si.market THEN i.close END) as index_close \
+query = "select i.date, MAX(CASE WHEN ii.name = si.market THEN i.close END) as index_close \
         ,  d.code, d.close as stock_close, d.volume, t.foreigner, t.institution \
-         from daily_index i, daily_info d, trading_trend t, stock_info si\
-        where i.index_type in ('KOSPI', 'KOSDAQ') and i.date > '20160101' and i.date = d.date  and i.date = t.date and d.code = t.code \
+         from daily_index i, daily_info d, trading_trend t, stock_info si, index_info ii\
+        where i.code in ('KS11', 'KQ11') and i.code = ii.code and i.date > '20160101' and i.date = d.date  and i.date = t.date and d.code = t.code \
         and d.code = '"+stock_code+"' and d.code = si.code GROUP BY i.date, d.code, d.close, d.volume, t.foreigner, t.institution order by date asc"
 cur.execute(query)
 
@@ -64,17 +59,20 @@ plt.legend(loc='best')
 # 지수 (포인트)
 index_chart = plt.subplot2grid((5,1), (1,0), rowspan=1)
 index_chart.plot(df.index, df['index_close'], label='index_close', lw=1, color='r')
+index_chart.set_title('Index')
 index_chart.grid(True)
 
 # volume (거래량)
 vol_chart = plt.subplot2grid((5,1), (2,0), rowspan=1)
 vol_chart.bar(df.index, df['volume'], color='c')
+vol_chart.set_title('Volume')
 vol_chart.grid(True)
 
 # volume (거래량)
 trend_chart = plt.subplot2grid((5,1), (3,0), rowspan=1)
 trend_chart.bar(df.index, df['foreigner'], color='r')
 trend_chart.bar(df.index, df['institution'], color='b')
+trend_chart.set_title('Foreigner - INstitution')
 trend_chart.grid(True)
 
 
@@ -82,6 +80,7 @@ trend_chart.grid(True)
 signal_chart = plt.subplot2grid((5,1), (4,0), rowspan=1)
 signal_chart.plot(df.index, df['diff'].fillna(0), color='g')
 plt.axhline(y=0, linestyle='--', color='k')
+signal_chart.set_title('MA')
 signal_chart.grid(True)
 
 # sell, buy annotate

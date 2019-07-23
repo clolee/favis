@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/App/tools/anaconda3/bin/python
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -15,18 +15,12 @@ import util.favis_util as favis_util
 import pymysql
 # set config
 ###################################################################################
-try:
-    conn = pymysql.connect(host='localhost',
-                         user='root',
-                         password='ckdfh76!!',
+conn = pymysql.connect(host='192.168.10.18',
+                         user='mnilcl',
+                         password='Cloud00!',
                          db='favis',
                          charset='utf8mb4',
                          cursorclass=pymysql.cursors.DictCursor)
-except pymysql.Error as e:
-    if conn:
-        conn.close()
-    print ("error %s" % e.args[0])
-
 cur = conn.cursor()
 
 

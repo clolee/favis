@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/App/tools/anaconda3/bin/python
 # -*- coding: utf-8 -*-
 import traceback
 import requests
