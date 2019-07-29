@@ -34,7 +34,9 @@ class favisbot(object):
             bot.sendPhoto(chat_id=self.chat_id, photo=open(msg, 'rb'))
         else:
             print ("msgtype is not allowed except [plain|html|imglink|img]")
-            
+
+    def getBot(self):
+        return self.favisbot
 
         
 if __name__ == '__main__':

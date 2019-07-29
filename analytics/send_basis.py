@@ -122,4 +122,3 @@ plt.savefig(stock_code + '.png', bbox_inches='tight')
 
 bot = favisbot()
 bot.whisper('img',stock_code + '.png')
-
