@@ -11,7 +11,6 @@ import concurrent.futures
 
 import sys
 sys.path.append('./')
-#from msgbot.favisbot import favisbot
 import util.krx_util as util
 import util.favis_util as fu
 from util.favis_logger import FavisLogger
@@ -26,15 +25,15 @@ logger = FavisLogger(task_id, task_id + '_' + datetime.datetime.today().strftime
 engine = sa.create_engine('mysql+mysqlconnector://mnilcl:Cloud00!@192.168.10.18:3306/favis', echo=False)
 
 def main_function(date):
-	print('\n\n' + str(datetime.datetime.today()) + ' : start...' + date )
+	logger.info('\n\n' + str(datetime.datetime.today()) + ' : start...' + date )
 	starttime = datetime.datetime.now()
 
 	conn = fu.get_favis_mysql_connection()
 	cur = conn.cursor()
-	print("1) get krx trading trend")
+	logger.info("1) get krx trading trend")
 	#df_sm = pd.read_sql_query("SELECT code FROM stock_info ORDER BY code ASC", conn)
 	df_sm = pd.read_sql_query("SELECT code FROM stock_info WHERE CODE NOT IN (SELECT CODE FROM trading_trend WHERE DATE = '"+ date +"') ORDER BY code ASC", conn)
-	print(df_sm.values.flatten())
+	logger.info(df_sm.values.flatten())
 	endtime = datetime.datetime.now()
 	if conn:
 		conn.close()
@@ -50,7 +49,7 @@ def main_function(date):
 
 		df = pd.read_excel(f, thousands=',', usecols=['투자자명','거래량_순매수'])
 		if (cnt%100 == 0):
-			print(str(cnt), end=',', flush=True)
+			logger.info(str(cnt), end=',', flush=True)
 #		else:
 #			print('.', end='', flush=True)
 		df['stock_code'] = stock_code
@@ -75,8 +74,8 @@ def main_function(date):
 				pass
 
 	endtime = datetime.datetime.now()
-	print('DATE(%s) count : %s, elaspsedtime : %s ' % date, str(cnt),  str(endtime - starttime))
-	print('%s : %s end...' % str(datetime.datetime.today()), task_id)
+	logger.info('DATE(%s) count : %s, elaspsedtime : %s ' % date, str(cnt),  str(endtime - starttime))
+	logger.info('%s : %s end...' % str(datetime.datetime.today()), task_id)
 
 
 
@@ -91,10 +90,9 @@ if __name__ == "__main__":
 			e_day =  (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y%m%d')   	
 
 		dd = fu.getWorkingDays(s_day, e_day)
-		print(dd)
 
 		pool = concurrent.futures.ProcessPoolExecutor(max_workers=10)
 		pool.map(main_function, dd)
 	except Exception as e:
-		print ("error %s" % e.args[0])
+		logger.error ("error %s" % e.args[0])
 

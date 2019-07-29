@@ -7,25 +7,18 @@ import pandas as pd
 from pandas import DataFrame
 # user define package import
 # user define package import
-favis_path = "/app/favis/"
 import sys
-sys.path.append(favis_path)
+sys.path.append('./')
 from msgbot.favisbot import favisbot
-import util.favis_util as favis_util
+import util.favis_util as fu
 import pymysql
 # set config
 ###################################################################################
 try:
-    conn = pymysql.connect(host='localhost',
-                         user='root',
-                         password='ckdfh76!!',
-                         db='favis',
-                         charset='utf8mb4',
-                         cursorclass=pymysql.cursors.DictCursor)
+    conn = fu.get_favis_mysql_connection()
 except pymysql.Error as e:
-    if conn:
-        conn.close()
     print ("error %s" % e.args[0])
+
 
 cur = conn.cursor()
 
