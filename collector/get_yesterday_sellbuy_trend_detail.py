@@ -39,7 +39,7 @@ def main_function(date):
 		conn.close()
 
 
-	cnt = 0
+	cnt = 1
 	for stock_code in df_sm.values.flatten():
 		isu_cd = util.getIsinCode(stock_code)
 		#print (stock_code, stock_name, isu_cd)
@@ -49,12 +49,13 @@ def main_function(date):
 
 		df = pd.read_excel(f, thousands=',', usecols=['투자자명','거래량_순매수'])
 		if (cnt%100 == 0):
-			logger.info(str(cnt), end=',', flush=True)
+#			logger.info(str(cnt), end=',', flush=True)
+			print(str(cnt))
 #		else:
-#			print('.', end='', flush=True)
+#			logger.info('.', end='', flush=True)
 		df['stock_code'] = stock_code
 		df = df.pivot(index='stock_code', columns='투자자명', values='거래량_순매수')
-		del df.index.name
+#		del df.index.name
 		df.columns = ['personal', 'nation_local','financial_investment','institution','etc_fin','etc_ins','etc_for','insurance',\
 				'private_equity_fund','pension_fund','foreigner','bank','investment_trust','total']
 		df['date'] = date
@@ -91,6 +92,8 @@ if __name__ == "__main__":
 
 		dd = fu.getWorkingDays(s_day, e_day)
 
+#		for d in dd:
+#			main_function(d)
 		pool = concurrent.futures.ProcessPoolExecutor(max_workers=10)
 		pool.map(main_function, dd)
 	except Exception as e:

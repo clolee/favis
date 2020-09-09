@@ -156,16 +156,20 @@ def get_krx_daily_sellbuy_trend(isu_cd, start, end):
         'period_strt_dd':start,
         'period_end_dd':end
     }
-    
-    r = requests.post(gen_otp_url, gen_otp_data)
+
+    headers = { 'Referer': 'http://marketdata.krx.co.kr/mdi', 'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'}
+
+    r = requests.post(gen_otp_url, gen_otp_data, headers=headers)
     code = r.text
-    
+
+    print(r.text)
+
     # STEP 02: download
     down_url = 'http://file.krx.co.kr/download.jspx'
     down_data = {
         'code': code,
     }
-    headers = { 'Referer': 'http://marketdata.krx.co.kr/mdi'}
+    headers = { 'Referer': 'http://marketdata.krx.co.kr/mdi', 'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'}
     return requests.post(down_url, down_data, headers=headers).content
 
 	
@@ -182,7 +186,9 @@ def get_krx_sellbuy_detail(isu_cd, start, end):
         'fromdate':start,
         'todate':end
     }
-    r = requests.post(gen_otp_url, gen_otp_data)
+
+    headers = { 'Referer': 'http://marketdata.krx.co.kr/mdi', 'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'}
+    r = requests.post(gen_otp_url, gen_otp_data, headers=headers)
     code = r.text
 
     # STEP 02: download
@@ -190,7 +196,6 @@ def get_krx_sellbuy_detail(isu_cd, start, end):
     down_data = {
         'code': code,
     }
-    headers = { 'Referer': 'http://marketdata.krx.co.kr/mdi'}
     return requests.post(down_url, down_data, headers=headers).content
     
 def get_krx_daily_stock_index(isu_cd, isu_srt_cd, start, end):    

@@ -94,8 +94,10 @@ if len(sys.argv) ==  3:
 	startdate = sys.argv[1]
 	enddate = sys.argv[2]
 	logger.debug('term : ' + startdate + '-' + enddate)
-	for d in fu.daterange(startdate, enddate):
-		main_function(d.strftime('%Y%m%d'))
+
+
+	for d in fu.getWorkingDays(startdate, enddate):
+		main_function(d)
 else:
 	day = (datetime.datetime.today() - datetime.timedelta(1)).strftime('%Y%m%d')
 	print("day:" + day)
