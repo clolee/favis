@@ -33,7 +33,7 @@ def main_function(date):
 	logger.info("1) get krx trading trend")
 	#df_sm = pd.read_sql_query("SELECT code FROM stock_info ORDER BY code ASC", conn)
 	df_sm = pd.read_sql_query("SELECT code FROM stock_info WHERE CODE NOT IN (SELECT CODE FROM trading_trend WHERE DATE = '"+ date +"') ORDER BY code ASC", conn)
-	logger.info(df_sm.values.flatten())
+#	logger.info(df_sm.values.flatten())
 	endtime = datetime.datetime.now()
 	if conn:
 		conn.close()
@@ -49,8 +49,7 @@ def main_function(date):
 
 		df = pd.read_excel(f, thousands=',', usecols=['투자자명','거래량_순매수'])
 		if (cnt%100 == 0):
-#			logger.info(str(cnt), end=',', flush=True)
-			print(str(cnt))
+			logger.info(str(cnt), end=',', flush=True)
 #		else:
 #			logger.info('.', end='', flush=True)
 		df['stock_code'] = stock_code
@@ -94,7 +93,7 @@ if __name__ == "__main__":
 
 #		for d in dd:
 #			main_function(d)
-		pool = concurrent.futures.ProcessPoolExecutor(max_workers=10)
+		pool = concurrent.futures.ProcessPoolExecutor(max_workers=5)
 		pool.map(main_function, dd)
 	except Exception as e:
 		logger.error ("error %s" % e.args[0])
