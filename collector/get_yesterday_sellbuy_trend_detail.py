@@ -30,7 +30,7 @@ def main_function(date):
 
 	conn = fu.get_favis_mysql_connection()
 	cur = conn.cursor()
-	logger.info("1) get krx trading trend")
+#	logger.info("1) get krx trading trend")
 	#df_sm = pd.read_sql_query("SELECT code FROM stock_info ORDER BY code ASC", conn)
 	df_sm = pd.read_sql_query("SELECT code FROM stock_info WHERE CODE NOT IN (SELECT CODE FROM trading_trend WHERE DATE = '"+ date +"') ORDER BY code ASC", conn)
 #	logger.info(df_sm.values.flatten())
@@ -38,20 +38,22 @@ def main_function(date):
 	if conn:
 		conn.close()
 
-
 	cnt = 1
 	for stock_code in df_sm.values.flatten():
 		isu_cd = util.getIsinCode(stock_code)
 		#print (stock_code, stock_name, isu_cd)
+		try:
+			r = util.get_krx_sellbuy_detail(isu_cd, date, date)
+			f = io.BytesIO(r)
 
-		r = util.get_krx_sellbuy_detail(isu_cd, date, date)
-		f = io.BytesIO(r)
-
-		df = pd.read_excel(f, thousands=',', usecols=['투자자명','거래량_순매수'])
-		if (cnt%100 == 0):
-			logger.info(str(cnt), end=',', flush=True)
-#		else:
-#			logger.info('.', end='', flush=True)
+			df = pd.read_excel(f, thousands=',', usecols=['투자자명','거래량_순매수'])
+			if (cnt%50 == 0):
+				print(str(cnt), end='\n')
+			else:
+	#			logger.info('.', end='', flush=True)
+				print('.',end='')
+		except Exception as e:
+			logger.error ("error %s" % e)
 		df['stock_code'] = stock_code
 		df = df.pivot(index='stock_code', columns='투자자명', values='거래량_순매수')
 #		del df.index.name
