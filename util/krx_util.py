@@ -63,11 +63,11 @@ def get_krx_daily_info(isu_cd, start, end):
         'fromdate':start,
         'todate':end
     }
+    headers = { 'Referer': 'http://marketdata.krx.co.kr/mdi', 'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'}
 
-    r = requests.get(gen_otp_url, gen_otp_data)
+    r = requests.get(gen_otp_url, gen_otp_data, headers=headers)
     code = r.text
 
-    headers = { 'Referer': 'http://marketdata.krx.co.kr/mdi', 'Connection': 'close'}
     # STEP 02: download
     down_url = 'http://file.krx.co.kr/download.jspx'
     down_data = {

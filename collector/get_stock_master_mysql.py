@@ -37,8 +37,9 @@ def get_krx_stock_master():
         'in_cpt2':'',
         'pagePath':'/contents/MKD/04/0406/04060100/MKD04060100.jsp',
     }
+    headers = { 'Referer': 'http://marketdata.krx.co.kr/mdi', 'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'}
 
-    r = requests.post(gen_otp_url, gen_otp_data)
+    r = requests.post(gen_otp_url, gen_otp_data, headers=headers)
     code = r.content
 
     # STEP 02: download
@@ -46,7 +47,6 @@ def get_krx_stock_master():
     down_data = {
         'code': code,
     }
-    headers = { 'Referer': 'http://marketdata.krx.co.kr/mdi'} # 꼭 있어야 함.
 
     r = requests.post(down_url, down_data, headers=headers)
     f = io.BytesIO(r.content)
@@ -104,7 +104,7 @@ def get_desc(code):
     if code[-1] == '7': # pre_order
         code = code[0:-1] + '0'
  
-    headers = {'Host':'companyinfo.stock.naver.com'}
+    headers = { 'Referer': 'http://marketdata.krx.co.kr/mdi', 'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'}
     r = requests.post(url, data={'cmp_cd': code}, headers=headers)
     if r.text == "":
         return (cmt_text, cmt_date)

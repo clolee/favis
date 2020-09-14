@@ -47,11 +47,13 @@ def main_function(date):
 			f = io.BytesIO(r)
 
 			df = pd.read_excel(f, thousands=',', usecols=['투자자명','거래량_순매수'])
-			if (cnt%50 == 0):
+			if (cnt%100 == 0):
 				print(str(cnt), end='\n')
+				endtime = datetime.datetime.now()
+				print(f'{stock_code} (elaspsedtime1 : {str(endtime - starttime)})')
 			else:
 	#			logger.info('.', end='', flush=True)
-				print('.',end='')
+				print('.', end='')
 		except Exception as e:
 			logger.error ("error %s" % e)
 		df['stock_code'] = stock_code
@@ -76,8 +78,9 @@ def main_function(date):
 				pass
 
 	endtime = datetime.datetime.now()
-	logger.info('DATE(%s) count : %s, elaspsedtime : %s ' % date, str(cnt),  str(endtime - starttime))
-	logger.info('%s : %s end...' % str(datetime.datetime.today()), task_id)
+#	logger.info('DATE(%s) count : %s, elaspsedtime : %s ' % date, str(cnt),  str(endtime - starttime))
+#	logger.info('%s : %s end...' % str(datetime.datetime.today()), task_id)
+	print(f'{date} (elaspsedtime1 : {str(endtime - starttime)})')
 
 
 
