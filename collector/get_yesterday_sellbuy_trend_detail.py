@@ -44,7 +44,9 @@ def main_function(date):
 		#print (stock_code, stock_name, isu_cd)
 		try:
 			r = util.get_krx_sellbuy_detail(isu_cd, date, date)
+			print(r)
 			f = io.BytesIO(r)
+			print(f)
 
 			df = pd.read_excel(f, thousands=',', usecols=['투자자명','거래량_순매수'])
 			if (cnt%100 == 0):

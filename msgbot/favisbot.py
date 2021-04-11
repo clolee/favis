@@ -12,8 +12,10 @@ class favisbot(object):
         #     for i,arg in enumerate(args):
         #         if type(arg)==str:
         #             print (arg)
-        self.favisbot = telegram.Bot(token='201142916:AAEBvuAYEXCKFe6Ql_DdkBk6V3Y3G6CdIZU')
-        self.chat_id = 185388733
+        self.favisbot = telegram.Bot(token='1742446121:AAHiVxMn3NVpaAbJJZOBZwMJjuM_dTYQSxY')
+        #self.chat_id = 185388733
+        self.chat_id = '@favis_gongsi'
+
 
     def setBotKey(self, token, chat_id):
         self.favisbot = telegram.Bot(token=token)

@@ -8,7 +8,7 @@ import pandas as pd
 
 def get_favis_mysql_connection():
 	try:
-		conn = pymysql.connect(host='192.168.10.18',
+		conn = pymysql.connect(host='192.168.0.6',
 							 user='mnilcl',
 							 password='Cloud00!',
 							 db='favis',
