@@ -21,14 +21,17 @@ starttime = datetime.datetime.now()
 conn = favis_util.get_favis_mysql_connection()
 cur = conn.cursor()
 bot = favisbot()
-search_date = datetime.datetime.now().strftime('%Y%m%d')
+search_date = (datetime.datetime.now().strftime('%Y%m%d')).replace('-', '.')
+print(search_date)
+exit
 #search_date = '20160511'
 groups = ['Y','K'] # 유가증권, 코스닥 구분
 
 for group in groups:
 	# find start, end page number
-	url = "http://dart.fss.or.kr/dsac001/search.ax"
-	formdata = {'selectDate':search_date,'currentPage':1, 'pageGrouping':group, 'mdayCnt':2}
+#	url = "http://dart.fss.or.kr/dsac001/search.ax"
+	url = "http://dart.fss.or.kr/dsac001/mainY.do"
+	formdata = {'selectDate':search_date,'currentPage':1, 'pageGrouping':group, 'mdayCnt':0}
 	data = requests.post(url, formdata)    
 	data = bs4.BeautifulSoup(data.text, "html5lib")
 	pageinfo = data.find("p", attrs={'class':'page_info'}).text.strip().split(']')[0].split('[')[1].split('/')
@@ -43,8 +46,8 @@ for group in groups:
 		elif group == 'Y':
 			market_type = 'KOSPI'
 			
-		url = "http://dart.fss.or.kr/dsac001/search.ax"
-		formdata = {'selectDate':search_date,'currentPage':i, 'pageGrouping':group, 'mdayCnt':2}
+		url = "http://dart.fss.or.kr/dsac001/mainY.do"
+		formdata = {'selectDate':search_date,'currentPage':i, 'pageGrouping':group, 'mdayCnt':0}
 		data = requests.post(url, formdata)    
 
 		data = bs4.BeautifulSoup(data.text, "html5lib")
@@ -93,7 +96,7 @@ cur.execute(query)
 rows = cur.fetchall()
 for row in rows:
 	logger.debug(row)
-	bot.whisper('plain','[유상증자 관련 공시]\n공시일시: ' + row['date']+" "+row['time']
+	bot.whisper('plain','[주요 공시]\n공시일시: ' + row['date']+" "+row['time']
 				+"\n회사: "+row['company']+"("+row['market_type']+")\n공시내용: "+row['title'] + "\n상세링크: "+row['link'])
 
 if conn:

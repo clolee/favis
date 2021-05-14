@@ -1,9 +1,17 @@
 import requests
 import bs4
-import sys
+import sys, io
 import datetime
 import json
 from collections import namedtuple
+import pandas as pd
+
+# constant
+KRX_OTP_URL = 'http://data.krx.co.kr/comm/fileDn/GenerateOTP/generate.cmd'
+KRX_DOWNLOAD_URL = 'http://data.krx.co.kr/comm/fileDn/download_excel/download.cmd'
+HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'}
+
+
 """
 Get ISIN CODE from KRX
 """
@@ -49,6 +57,49 @@ def calc_checkdigit(isin):
     mod = (even_sum + odd_sum) % 10
     return (10-mod)%10
 
+
+def request(params):
+    gen_otp_url = KRX_OTP_URL
+    gen_otp_data = params
+
+    r = requests.post(gen_otp_url, gen_otp_data, headers=HEADERS)
+    code = r.content
+
+    down_url = KRX_DOWNLOAD_URL
+    down_data = {
+        'code': code,
+    }
+    
+    return io.BytesIO(requests.post(down_url, down_data).content)
+
+def get_krx_stock_info():
+    gen_otp_data = {
+        'name':'fileDown',
+        'csvxls_isNo':'false',
+        'url':'dbms/MDC/STAT/standard/MDCSTAT01901',
+        'mktId':'ALL', # ''ALL':전체, STK': 코스피
+        'share':'1',
+    }
+    f = request(gen_otp_data)
+    return f
+
+def get_krx_price(isu_cd, start, end):
+    gen_otp_data = {
+        'name':'fileDown',
+        'csvxls_isNo':'false',
+        'url':'dbms/MDC/STAT/standard/MDCSTAT01701',
+        'money':'1', 
+        'share':'1',
+        'strtDd':start,
+        'endDd':end,
+        'isuCd': isu_cd,
+        'isuCd2': isu_cd,
+#        'tboxisuCd_finder_stkisu0_3': '005930/삼성전자',
+#        'codeNmisuCd_finder_stkisu0_3': '삼성전자',
+#        'param1isuCd_finder_stkisu0_3': 'ALL',
+    }
+    f = request(gen_otp_data)
+    return f
 
 # get krx daily info 
 def get_krx_daily_info(isu_cd, start, end):

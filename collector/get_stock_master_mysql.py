@@ -1,62 +1,26 @@
 # -*- coding: utf-8 -*-
 import requests
-import pandas as pd
-import io
-import sys
-import time
-import json
+import sys, os, io
+import datetime, time
 from bs4 import BeautifulSoup
-import pymysql
+import pandas as pd
 
-sys.path.append("/App/favis/")
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 # User Defined Modules
 import util.favis_util as fu
+import util.krx_util as ku
 
-def get_krx_stock_master():
-    # STEP 01: Generate OTP
-    gen_otp_url = 'http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx'
-    gen_otp_data = {
-        'name':'fileDown',
-        'filetype':'xls',
-        'url':'MKD/04/0406/04060100/mkd04060100_01',
-        'market_gubun':'ALL', # ''ALL':전체, STK': 코스피
-        'isu_cdnm':'전체',
-        'isu_cd':'',
-        'isu_nm':'',
-        'isu_srt_cd':'',
-        'sort_type':'A',
-        'std_ind_cd':'01',
-        'par_pr':'',
-        'cpta_scl':'',
-        'sttl_trm':'',
-        'lst_stk_vl':'1',
-        'in_lst_stk_vl':'',
-        'in_lst_stk_vl2':'',
-        'cpt':'1',
-        'in_cpt':'',
-        'in_cpt2':'',
-        'pagePath':'/contents/MKD/04/0406/04060100/MKD04060100.jsp',
-    }
-    headers = { 'Referer': 'http://marketdata.krx.co.kr/mdi', 'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'}
+import sqlalchemy as sa
+from sqlalchemy import exc
+#####################################################################################
+DB_USER='mnilcl' 
+DB_PASS='Cloud00!'
+DB_HOST='192.168.0.6'
+DB_PORT='3306'
+DATABASE='favis'
+connect_string = 'mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8mb4'.format(DB_USER, DB_PASS, DB_HOST, DB_PORT, DATABASE)
+engine = sa.create_engine(connect_string, convert_unicode=True, echo=False)
 
-    r = requests.post(gen_otp_url, gen_otp_data, headers=headers)
-    code = r.content
-
-    # STEP 02: download
-    down_url = 'http://file.krx.co.kr/download.jspx'
-    down_data = {
-        'code': code,
-    }
-
-    r = requests.post(down_url, down_data, headers=headers)
-    f = io.BytesIO(r.content)
-    
-    usecols = ['종목코드', '기업명', '업종코드', '업종', '대표전화', '주소']
-    df = pd.read_excel(f, converters={'종목코드': str, '업종코드': str}, usecols=usecols)
-    df.columns = ['code', 'name', 'sector_code', 'sector', 'telephone', 'address']
-    
-    return df
-    
 # sector, wics, name_en
 def get_sector(code):
     name_en, sector, wics, market = 'nan', 'nan', 'nan', 'nan'
@@ -120,51 +84,36 @@ def get_desc(code):
 if __name__ == "__main__":
 
     conn = fu.get_favis_mysql_connection()
-    
     cur = conn.cursor()
 
+    starttime = datetime.datetime.now()
     print("1) get krx stock master")
-    df = get_krx_stock_master()   
+ 
+    f = ku.get_krx_stock_info()   
     
+    usecols = ['단축코드', '표준코드','한글 종목약명', '영문 종목명', '상장일', '시장구분', '상장주식수']
+    df = pd.read_excel(f, converters={'단축코드': str}, usecols=usecols)
+#    df = pd.read_excel(f)
+    df.columns = ['std_code', 'code','name', 'name_en', 'ipo_date', 'market', 'total_stock_count']
+    df = df[['code','std_code','name', 'name_en', 'ipo_date', 'market', 'total_stock_count']]
     # stock_desc 테이블  쓰기
-    df_desc = df[['code', 'name', 'sector_code', 'sector', 'telephone', 'address']].copy()
-    df_desc['market'] = ''
-    df_desc['wics'] = ''
-    df_desc['name_en'] = ''
-    df_desc['desc'] = ''
-    df_desc['desc_date'] = ''
-    df_desc = df_desc.fillna('')
+    df['sector'] = ''
+    df['sector_code'] = ''
+    df['updateddt'] = datetime.datetime.now()
+    df = df.fillna('')
+    print(df)    
+
     
     print("2) get stock desc and update db")
-    cnt = 0
-    for idx, row in df_desc.iterrows():
-        try:
-            if row['wics'] == '':
-                market, wics, name_en = get_sector(row['code'])
-                cur.execute('INSERT INTO stock_info (code, name, name_en, market, wics, sector, sector_code, telephone, address) ' \
-                            'VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)', (row['code'], row['name'], name_en, market, wics, row['sector'], row['sector_code'], row['telephone'], row['address']) )
-                conn.commit()
-        
-            if row['desc_date'] == '':
-                desc, desc_date = get_desc(row['code'])
-                cur.execute('UPDATE stock_info SET description=%s, desc_updateddt = %s WHERE code=%s', (desc, desc_date, row['code']) )
-                conn.commit()
 
-            cnt = cnt + 1
-            if (cnt % 100) == 0:
-                print("3) get krx stock master (%s)" % cnt)
+    try:
+        df.to_sql(name='stock_info', con=engine, if_exists = 'append', index=False)
+    except exc.IntegrityError:
+        pass
+    endtime = datetime.datetime.now()
 
-        except pymysql.IntegrityError:
-            cur.execute('UPDATE stock_info SET name=%s, updateddt=current_timestamp WHERE code=%s', (row['name'], row['code']) )
-#				print ("IntegrityError %s" % row['code'])
-            conn.commit()
-            pass
-        except pymysql.Error as e:
-            if conn:
-                conn.rollback()
-            print ("error %s (%s)" % e.args[0], str(e))
+    print('elapsed time : ',  str(endtime - starttime))
 
-    
-    print ("total %s record inserted" % cnt)
-    conn.close()    
 
+    if conn:
+        conn.close()
